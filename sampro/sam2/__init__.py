@@ -4,6 +4,9 @@
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
 
+import importlib.util
+import sys
+
 from hydra import initialize_config_module
 from hydra.core.global_hydra import GlobalHydra
 
@@ -31,3 +34,8 @@ def _initialize_hydra_configs() -> None:
 
 if not GlobalHydra.instance().is_initialized():
     _initialize_hydra_configs()
+
+# 提供一个与上游一致的顶层别名 ``sam2``，
+# 以便 Hydra 配置中的 ``_target_: sam2.xxx`` 可以正常解析。
+if "sam2" not in sys.modules and importlib.util.find_spec("sam2") is None:
+    sys.modules["sam2"] = sys.modules[__name__]
