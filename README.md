@@ -57,7 +57,7 @@ LabelQuick_V2.0 是一款由 AI Horizon 团队设计并开发的快速图像标�
    说明：
 
    - `requirements.txt` 已包含 CUDA 12.x 对应的 PyTorch 2.5.1（cu124）轮子，会自动从 PyTorch 官方仓库下载；保持系统显卡驱动不低于 CUDA 12.4 版本即可与 CUDA 12.9 正常兼容。
-   - 文件同时为 Windows 自动选择 `pycocotools-windows`，其他平台使用 `pycocotools`，确保标注功能依赖齐全。
+   - `requirements.txt` 统一依赖 `pycocotools`。Windows 用户需要先安装 [Visual C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) 并确保已安装 `cython`，随后执行 `pip install pycocotools>=2.0.8` 即可完成编译安装。
    - 如果在安装过程中 CUDA 扩展编译失败，可在安装前执行 `export SAM2_BUILD_CUDA=0`（Windows 使用 `set SAM2_BUILD_CUDA=0`）以跳过可选的 GPU 扩展构建。
 
 4. **项目运行**
