@@ -60,6 +60,29 @@ LabelQuick_V2.0 是一款由 AI Horizon 团队设计并开发的快速图像标�
    - `requirements.txt` 统一依赖 `pycocotools`。Windows 用户需要先安装 [Visual C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) 并确保已安装 `cython`，随后执行 `pip install pycocotools>=2.0.8` 即可完成编译安装。
    - 如果在安装过程中 CUDA 扩展编译失败，可在安装前执行 `export SAM2_BUILD_CUDA=0`（Windows 使用 `set SAM2_BUILD_CUDA=0`）以跳过可选的 GPU 扩展构建。
 
+   - **国内镜像加速（可选）**
+
+     如果在国内网络环境下下载依赖较慢，可先配置 Conda 与 pip 的国内镜像：
+
+     ```bash
+     # Conda 镜像（如已配置可跳过）
+     conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main
+     conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge
+     conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch
+     conda config --set show_channel_urls yes
+
+     # pip 镜像（requirements.txt 已默认启用清华源和 PyTorch CUDA 轮子源）
+     pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+     pip config set global.extra-index-url https://download.pytorch.org/whl/cu124
+     ```
+
+     如果不想修改全局配置，可在安装时临时指定：
+
+     ```bash
+     pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple \
+         --extra-index-url https://download.pytorch.org/whl/cu124
+     ```
+
 4. **项目运行**
 
 - 运行 `Run.py` 打开 LabelQuick。
