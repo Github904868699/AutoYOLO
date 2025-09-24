@@ -1,22 +1,31 @@
-from sampro.sam2.build_sam import build_sam2_video_predictor
-import numpy as np
-import torch
-import cv2
-import sys
 import os
 from pathlib import Path
-from util.xmlfile import xml_message
+
+import cv2
+import numpy as np
+import torch
 from PIL import Image
 
+from sampro.sam2.build_sam import build_sam2_video_predictor
+from util.xmlfile import xml_message
 
-# 设置当前文件夹
-sys.path.append(r'sampro')
+SAMPRO_ROOT = Path(__file__).resolve().parent
 
 class AnythingVideo_TW():
     def __init__(self):
         # SAM2 模型配置
-        self.sam2_checkpoint = "sampro/checkpoints/sam2.1_hiera_large.pt"
-        self.model_cfg = "configs/sam2.1/sam2.1_hiera_l.yaml"
+        checkpoint_path = os.getenv(
+            "SAM2_CHECKPOINT",
+            SAMPRO_ROOT / "checkpoints" / "sam2.1_hiera_large.pt",
+        )
+        checkpoint_path = Path(checkpoint_path).expanduser().resolve()
+        if not checkpoint_path.exists():
+            raise FileNotFoundError(
+                f"未找到 SAM2 权重文件: {checkpoint_path}. 请将模型文件放在 sampro/checkpoints/ 目录"
+            )
+
+        self.sam2_checkpoint = str(checkpoint_path)
+        self.model_cfg = os.getenv("SAM2_MODEL_CONFIG", "configs/sam2.1/sam2.1_hiera_l.yaml")
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         self.video_path = ""
         self.output_path = ""

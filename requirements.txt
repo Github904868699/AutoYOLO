@@ -1,7 +1,45 @@
+--extra-index-url https://download.pytorch.org/whl/cu124
 
-PyQt5_sip==12.13.0
-setuptools==68.0.0
-strawberry==3.0
-submitit==1.5.2
+# Core PyTorch stack (CUDA 12.x)
+torch==2.5.1+cu124
+torchvision==0.20.1+cu124
+torchaudio==2.5.1+cu124
 tensordict==0.6.2
-tqdm==4.66.4
+
+# Qt UI
+PyQt5==5.15.11
+PyQt5_sip==12.13.0
+
+# Array & image processing
+numpy==1.26.4
+opencv-python==4.10.0.84
+Pillow==10.4.0
+scikit-image==0.24.0
+
+# Visualization & logging
+matplotlib==3.9.2
+tensorboard==2.17.1
+tqdm==4.66.5
+
+# Data handling
+pandas==2.2.3
+
+# SAM2 and model tooling
+hydra-core==1.3.2
+omegaconf==2.3.0
+iopath==0.1.10
+fvcore==0.1.5.post20221221
+huggingface-hub==0.24.6
+submitit==1.5.2
+eva-decord==0.6.1
+onnxruntime-gpu==1.19.2
+pyyaml==6.0.2
+
+# Datasets & annotations
+pycocotools>=2.0.8; platform_system != "Windows"
+pycocotools-windows>=2.0.0.2; platform_system == "Windows"
+cython==3.0.11
+
+# Packaging helpers
+setuptools>=68.0.0
+wheel>=0.44.0

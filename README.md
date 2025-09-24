@@ -33,27 +33,32 @@ LabelQuick_V2.0 是一款由 AI Horizon 团队设计并开发的快速图像标�
 下载[模型](https://pan.baidu.com/s/1dnfxBXaCYANRGcAxx7y0vg?pwd=ax58)到 `sampro/checkpoints` 里面。
 -<div> <img src="docs/image3.png"></div>
 
+   如果您希望将权重存放在其他目录，也可以在启动前设置环境变量 `SAM2_CHECKPOINT=/your/path/sam2.1_hiera_large.pt`（Windows 使用 `set` 命令），项目会自动读取该路径。
+
 3. **环境配置**
-   ```bash
-   # 虚拟环境创建
-    conda create -n Anything python=3.10
-    conda activate Anything
 
-    # pytorch安装方式1（没有安装CUDA）：
-    conda install cudatoolkit=11.8 -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/linux-64/
+   项目已针对 **Python 3.10.18** 与 **CUDA 12.9** 更新依赖。
 
-    conda install cudnn
+   - **方式一：使用 Conda 一键创建环境（推荐）**
 
-    pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu118
+     ```bash
+     conda env create -f environment.yml
+     conda activate labelquick
+     ```
 
-    # pytorch安装方式2（已经有安装CUDA，版本为CUDA=11.8）：
-    pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu118
-    ```
+   - **方式二：在已有虚拟环境中手动安装**
 
-    ```bash
-    # 安装项目依赖
-    pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-    ```
+     ```bash
+     conda create -n labelquick python=3.10.18
+     conda activate labelquick
+     pip install -r requirements.txt
+     ```
+
+   说明：
+
+   - `requirements.txt` 已包含 CUDA 12.x 对应的 PyTorch 2.5.1（cu124）轮子，会自动从 PyTorch 官方仓库下载；保持系统显卡驱动不低于 CUDA 12.4 版本即可与 CUDA 12.9 正常兼容。
+   - 文件同时为 Windows 自动选择 `pycocotools-windows`，其他平台使用 `pycocotools`，确保标注功能依赖齐全。
+   - 如果在安装过程中 CUDA 扩展编译失败，可在安装前执行 `export SAM2_BUILD_CUDA=0`（Windows 使用 `set SAM2_BUILD_CUDA=0`）以跳过可选的 GPU 扩展构建。
 
 4. **项目运行**
 
