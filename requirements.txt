@@ -9,7 +9,8 @@ tensordict==0.6.1
 
 # Qt UI
 PyQt5==5.15.11
-PyQt5_sip==12.13.0
+# PyQt5 5.15.11 requires PyQt5-sip>=12.15,<13; pin to the first compatible build.
+PyQt5_sip==12.15.0
 
 # Array & image processing
 numpy==1.26.4
