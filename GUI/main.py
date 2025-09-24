@@ -1,4 +1,5 @@
 import sys, os
+from pathlib import Path
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QPen
 from PyQt5.QtCore import Qt, QCoreApplication, QRect, pyqtSignal,QTimer
@@ -300,6 +301,9 @@ class MainFunc(QMainWindow):
                     self.ui.label_4.setCursor(Qt.ArrowCursor)
                     if os.path.exists(f"{self.save_path}/{self.image_name}.xml"):
                         os.remove(f"{self.save_path}/{self.image_name}.xml")
+                        txt_path = Path(self.save_path) / f"{self.image_name}.txt"
+                        if txt_path.exists():
+                            txt_path.unlink()
                         self.labels = []
                     else:
                         super(QMainWindow, self).keyPressEvent(event)
