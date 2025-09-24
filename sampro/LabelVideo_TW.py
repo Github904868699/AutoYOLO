@@ -6,6 +6,7 @@ import numpy as np
 import torch
 from PIL import Image
 
+from sampro.device import resolve_device
 from sampro.sam2.build_sam import build_sam2_video_predictor
 from util.xmlfile import xml_message
 
@@ -26,7 +27,7 @@ class AnythingVideo_TW():
 
         self.sam2_checkpoint = str(checkpoint_path)
         self.model_cfg = os.getenv("SAM2_MODEL_CONFIG", "configs/sam2.1/sam2.1_hiera_l.yaml")
-        self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        self.device = resolve_device()
         self.video_path = ""
         self.output_path = ""
         self.predictor = build_sam2_video_predictor(self.model_cfg, self.sam2_checkpoint, self.device)

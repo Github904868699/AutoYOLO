@@ -3,6 +3,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+from sampro.device import resolve_device
 from sampro.sam2.build_sam import build_sam2
 from sampro.sam2.sam2_image_predictor import SAM2ImagePredictor
 
@@ -22,7 +23,7 @@ class Anything_TW():
 
         self.sam2_checkpoint = str(checkpoint_path)
         self.model_cfg = os.getenv("SAM2_MODEL_CONFIG", "configs/sam2.1/sam2.1_hiera_l.yaml")
-        self.device = "cuda"
+        self.device = resolve_device()
         #全局变量
         self.coords = []
         self.methods = []

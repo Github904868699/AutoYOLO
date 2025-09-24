@@ -12,6 +12,8 @@ import numpy as np
 import torch
 from torch import nn
 
+from sampro.device import cuda_is_supported
+
 
 class PositionEmbeddingSine(nn.Module):
     """
@@ -43,7 +45,7 @@ class PositionEmbeddingSine(nn.Module):
         self.scale = scale
 
         self.cache = {}
-        if warmup_cache and torch.cuda.is_available():
+        if warmup_cache and cuda_is_supported():
             # Warmup cache for cuda, to help with compilation
             device = torch.device("cuda")
             for stride in strides:
