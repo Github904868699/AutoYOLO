@@ -7,5 +7,27 @@
 from hydra import initialize_config_module
 from hydra.core.global_hydra import GlobalHydra
 
+
+def _initialize_hydra_configs() -> None:
+    """Register the Hydra config package used by SAM2.
+
+    The upstream project installs as a top-level ``sam2`` package, but inside
+    AutoYOLO the module lives under ``sampro.sam2``.  We try both locations so
+    that the code works whether users rely on the vendored copy or install the
+    original wheel separately.
+    """
+
+    for module_name in ("sampro.sam2", "sam2"):
+        try:
+            initialize_config_module(module_name, version_base="1.2")
+            return
+        except ModuleNotFoundError:
+            continue
+
+    raise ModuleNotFoundError(
+        "未能找到 SAM2 的 Hydra 配置包，请确认项目完整或已正确安装 sam2。"
+    )
+
+
 if not GlobalHydra.instance().is_initialized():
-    initialize_config_module("sam2", version_base="1.2")
+    _initialize_hydra_configs()
