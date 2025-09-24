@@ -1,0 +1,7 @@
+
+PyQt5_sip==12.13.0
+setuptools==68.0.0
+strawberry==3.0
+submitit==1.5.2
+tensordict==0.6.2
+tqdm==4.66.4
