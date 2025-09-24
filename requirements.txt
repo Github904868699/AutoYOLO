@@ -4,7 +4,8 @@
 torch==2.5.1+cu124
 torchvision==0.20.1+cu124
 torchaudio==2.5.1+cu124
-tensordict==0.6.2
+# tensordict 0.6.1 is the latest release published with CUDA 12.4 wheels
+tensordict==0.6.1
 
 # Qt UI
 PyQt5==5.15.11
