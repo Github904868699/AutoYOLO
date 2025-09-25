@@ -112,10 +112,14 @@ class Ui_MainWindow(object):
         self.comboBox = QtWidgets.QComboBox(self.layoutWidget)
         self.comboBox.setObjectName("comboBox")
         self.comboBox.addItem("")
-
+        self.comboBox.addItem("")
         self.comboBox.setFocusPolicy(QtCore.Qt.NoFocus)
-
         self.verticalLayout.addWidget(self.comboBox)
+
+        self.currentImageLabel = QtWidgets.QLabel(self.layoutWidget)
+        self.currentImageLabel.setObjectName("currentImageLabel")
+        self.currentImageLabel.setWordWrap(True)
+        self.verticalLayout.addWidget(self.currentImageLabel)
         self.frame_2 = QtWidgets.QFrame(self.layoutWidget)
         self.frame_2.setMinimumSize(QtCore.QSize(0, 50))
         self.frame_2.setFrameShape(QtWidgets.QFrame.StyledPanel)
@@ -304,6 +308,8 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "LabelQuick"))
         self.label.setText(_translate("MainWindow", "选择保存类型"))
         self.comboBox.setItemText(0, _translate("MainWindow", "XML"))
+        self.comboBox.setItemText(1, _translate("MainWindow", "YOLO"))
+        self.currentImageLabel.setText(_translate("MainWindow", "当前图片：-"))
         self.label_2.setText(_translate("MainWindow", "标签箱"))
         self.label_5.setText(_translate("MainWindow", "视频操作："))
         self.pushButton.setText(_translate("MainWindow", "开始"))

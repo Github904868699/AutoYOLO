@@ -63,16 +63,16 @@ def _ensure_class_ids(save_dir: Path, label_names: Iterable[str]) -> Dict[str, i
     return {name: idx for idx, name in enumerate(classes)}
 
 
-def _write_yolo_annotation(save_path: Path, size, labels):
-    """Write YOLOv8 compatible annotations next to the XML file."""
+def _write_yolo_annotation(base_path: Path, size, labels):
+    """Write YOLOv8 compatible annotations next to the annotation stem."""
 
     image_w, image_h = size[0], size[1]
     if not image_w or not image_h:
         return
 
-    save_dir = save_path.parent
+    save_dir = base_path.parent
     class_map = _ensure_class_ids(save_dir, (label["name"] for label in labels))
-    txt_path = save_path.with_suffix(".txt")
+    txt_path = base_path.with_suffix(".txt")
     yolo_lines: List[str] = []
 
     for label in labels:
@@ -119,6 +119,60 @@ def _write_yolo_annotation(save_path: Path, size, labels):
     else:
         if txt_path.exists():
             txt_path.unlink()
+
+
+def write_yolo_labels(base_path: Path, size, labels):
+    """Persist annotations in YOLO format using the provided base path."""
+
+    _write_yolo_annotation(base_path, size, labels)
+
+
+def load_yolo_labels(txt_path: Path, image_w: int, image_h: int):
+    """Load YOLO annotations and convert them to the internal label structure."""
+
+    if not txt_path.exists() or not image_w or not image_h:
+        return [], [], []
+
+    class_list = _load_existing_classes(txt_path.parent / YOLO_CLASS_FILE)
+    labels = []
+    boxes = []
+    names = []
+
+    with txt_path.open("r", encoding="utf-8") as handle:
+        for raw_line in handle:
+            parts = raw_line.strip().split()
+            if len(parts) != 5:
+                continue
+
+            try:
+                class_id = int(parts[0])
+                x_center = float(parts[1]) * image_w
+                y_center = float(parts[2]) * image_h
+                box_width = float(parts[3]) * image_w
+                box_height = float(parts[4]) * image_h
+            except ValueError:
+                continue
+
+            class_name = class_list[class_id] if 0 <= class_id < len(class_list) else str(class_id)
+
+            x_min = max(int(round(x_center - box_width / 2)), 0)
+            y_min = max(int(round(y_center - box_height / 2)), 0)
+            width = max(int(round(box_width)), 0)
+            height = max(int(round(box_height)), 0)
+
+            label = {
+                "name": class_name,
+                "pose": "Unspecified",
+                "truncated": 0,
+                "difficult": 0,
+                "bndbox": [x_min, y_min, width, height],
+            }
+
+            labels.append(label)
+            boxes.append([x_min, y_min, x_min + width, y_min + height])
+            names.append(class_name)
+
+    return labels, boxes, names
 
 
 def xml(image_path, save_path, size, labels):
@@ -171,7 +225,6 @@ def xml(image_path, save_path, size, labels):
     tree = ET.ElementTree(root)
     tree.write(save_path)  # 写入文件
 
-    _write_yolo_annotation(Path(save_path), size, labels)
     return tree
 
 def xml_message(save_path,image_name,img_width,img_height,text,x,y,w,h):
