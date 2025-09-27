@@ -17,6 +17,9 @@
 - 优化了项目代码，修改了以知的BUG。
 
 
+### AutoYolo 次世代工具
+为满足 RTX 50 系列用户的 GPU 支持需求，项目新增 `AutoYolo/` 子目录，提供 PySide6 全新界面与 DirectML 自动回退能力。请参阅 [AutoYolo/README.md](AutoYolo/README.md) 了解安装与使用方法。
+
 ### 简介
 LabelQuick_V2.0 是一款由 AI Horizon 团队设计并开发的快速图像标注工具，该版本在上一个版本的基础上进行了优化与改进。目前提供了直观易用的界面和强大的标注与分割功能，帮助您高效完成数据集的标注工作。当前版本仅支持 Windows 系统。
 
