@@ -1,14 +1,14 @@
 --index-url https://pypi.tuna.tsinghua.edu.cn/simple
---extra-index-url https://download.pytorch.org/whl/cu124
+--extra-index-url https://download.pytorch.org/whl/cu129
 
-# 使用清华 PyPI 镜像作为主索引，加速国内环境安装；PyTorch CUDA 轮子仍从官方源获取。
+# 使用清华 PyPI 镜像作为主索引，加速国内环境安装；PyTorch CUDA 12.9 轮子仍从官方源获取。
 
-# Core PyTorch stack (CUDA 12.x)
-torch==2.5.1+cu124
-torchvision==0.20.1+cu124
-torchaudio==2.5.1+cu124
-# tensordict 0.6.1 is the latest release published with CUDA 12.4 wheels
-tensordict==0.6.1
+# Core PyTorch stack (CUDA 12.9 / sm_120)
+torch==2.6.0+cu129
+torchvision==0.21.0+cu129
+torchaudio==2.6.0+cu129
+# tensordict 0.7.2 发布了与 torch 2.6/cu129 对应的轮子，兼容 RTX 50 系列
+tensordict==0.7.2
 
 # Qt UI
 PyQt5==5.15.11

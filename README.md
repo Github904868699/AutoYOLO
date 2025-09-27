@@ -24,6 +24,7 @@ LabelQuick_V2.0 是一款由 AI Horizon 团队设计并开发的快速图像标�
 
 
 ### 快速开始
+> 想在 RTX 50 系列或 CUDA 12.9 环境下极速部署？请参阅新增的《[LabelQuick CUDA 12.9 版简介](docs/cuda129_overview.md)》获取完整说明。
 >⚠️显存最低需要`6G`⚠️
 1. **拉取代码**
    ```bash
@@ -38,7 +39,7 @@ LabelQuick_V2.0 是一款由 AI Horizon 团队设计并开发的快速图像标�
 
 3. **环境配置**
 
-   项目已针对 **Python 3.10.18** 与 **CUDA 12.9** 更新依赖。
+   项目已针对 **Python 3.10.18** 与 **CUDA 12.9** 更新依赖，可直接驱动 RTX 5060（计算能力 `sm_120`）。
 
    - **方式一：使用 Conda 一键创建环境（推荐）**
 
@@ -57,8 +58,8 @@ LabelQuick_V2.0 是一款由 AI Horizon 团队设计并开发的快速图像标�
 
    说明：
 
-   - `requirements.txt` 已包含 CUDA 12.x 对应的 PyTorch 2.5.1（cu124）轮子，会自动从 PyTorch 官方仓库下载；保持系统显卡驱动不低于 CUDA 12.4 版本即可与 CUDA 12.9 正常兼容。
-   - 如果显卡过新（例如 RTX 50 系列，计算能力 `sm_120` 仍未被当前轮子支持），项目会自动检测并切换到 CPU 推理，同时在终端给出提示；您也可以在启动前通过设置 `SAM_DEVICE=cpu` 强制使用 CPU。
+   - `requirements.txt` 已包含 PyTorch 2.6.0 的 CUDA 12.9（`cu129`）官方轮子，能够原生支持 RTX 50 系列等 `sm_120` 架构显卡。请确保已安装 **CUDA 12.9 驱动** 或更新版本。
+   - 若希望在 CPU 上运行，可在启动前通过设置 `SAM_DEVICE=cpu` 强制使用 CPU；项目仍会在检测到 GPU 不可用时自动回退。
    - `requirements.txt` 统一依赖 `pycocotools`。Windows 用户需要先安装 [Visual C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) 并确保已安装 `cython`，随后执行 `pip install pycocotools>=2.0.8` 即可完成编译安装。
    - 如果在安装过程中 CUDA 扩展编译失败，可在安装前执行 `export SAM2_BUILD_CUDA=0`（Windows 使用 `set SAM2_BUILD_CUDA=0`）以跳过可选的 GPU 扩展构建。
 
@@ -75,14 +76,14 @@ LabelQuick_V2.0 是一款由 AI Horizon 团队设计并开发的快速图像标�
 
      # pip 镜像（requirements.txt 已默认启用清华源和 PyTorch CUDA 轮子源）
      pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
-     pip config set global.extra-index-url https://download.pytorch.org/whl/cu124
+     pip config set global.extra-index-url https://download.pytorch.org/whl/cu129
      ```
 
      如果不想修改全局配置，可在安装时临时指定：
 
      ```bash
      pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple \
-         --extra-index-url https://download.pytorch.org/whl/cu124
+        --extra-index-url https://download.pytorch.org/whl/cu129
      ```
 
 4. **项目运行**
