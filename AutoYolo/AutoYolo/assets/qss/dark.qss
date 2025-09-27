@@ -1,0 +1,51 @@
+/* Minimal dark theme for AutoYolo */
+QWidget {
+    background-color: #1f2430;
+    color: #e0e6f0;
+    font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", sans-serif;
+    font-size: 14px;
+}
+
+QToolBar {
+    background: #272d3a;
+    border: none;
+}
+
+QToolButton {
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+
+QToolButton:hover {
+    background: #39425a;
+}
+
+QLabel#datasetLabel {
+    font-weight: 600;
+    font-size: 15px;
+}
+
+QGroupBox {
+    border: 1px solid #39425a;
+    border-radius: 8px;
+    margin-top: 12px;
+    padding: 12px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 12px;
+    padding: 0 4px;
+}
+
+QDoubleSpinBox {
+    padding: 4px;
+    border: 1px solid #39425a;
+    border-radius: 6px;
+    background: #222836;
+}
+
+QSplitter::handle {
+    background: #2f3646;
+    width: 6px;
+}

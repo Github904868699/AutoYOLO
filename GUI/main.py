@@ -1,4 +1,5 @@
 import sys, os
+from pathlib import Path
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtGui import QImage, QPixmap, QPainter, QPen
 from PyQt5.QtCore import Qt, QCoreApplication, QRect, pyqtSignal,QTimer
@@ -94,6 +95,10 @@ class MainFunc(QMainWindow):
 
         self.timer_camera = QTimer()
 
+        self.annotation_format = self.ui.comboBox.currentText().strip().upper() or "XML"
+        self.ui.comboBox.currentTextChanged.connect(self.on_annotation_format_changed)
+        self.ui.currentImageLabel.setText("当前图片：-")
+
         self.ui.actionOpen_Dir.triggered.connect(self.get_dir)
         self.ui.actionNext_Image.triggered.connect(self.next_img)
         self.ui.actionPrev_Image.triggered.connect(self.prev_img)
@@ -147,6 +152,8 @@ class MainFunc(QMainWindow):
             self.ui.pushButton_start_marking.setEnabled(False)
             # 鼠标点击触发
             self.ui.label_4.mousePressEvent = self.mouse_press_event
+        else:
+            self.ui.currentImageLabel.setText("当前图片：-")
 
     def show_path_image(self):
         if self.image_files:
@@ -161,19 +168,49 @@ class MainFunc(QMainWindow):
             self.AT.Set_Image(self.image)
             self.show_qt(self.img_path)
             self.Exists_Labels_And_Boxs()
+            self.ui.currentImageLabel.setText(f"当前图片：{os.path.basename(self.image_path)}")
+        else:
+            self.ui.currentImageLabel.setText("当前图片：-")
 
     # 展示已保存所有标签
     def Exists_Labels_And_Boxs(self):
         self.list_labels = []
-        label_file = os.path.exists(f"{self.save_path}/{self.image_name}.xml")
-        if label_file:
-            label_path = f"{self.save_path}/{self.image_name}.xml"
-            self.labels = get_labels(label_path)
-            self.list_labels,list_box = list_label(label_path)
-            self.paint_save = list_box
-            self.Show_Exists()
-            for label in self.list_labels:
-                self.ui.listWidget.addItem(label)
+        self.labels = []
+        self.clicked_save = []
+        self.paint_save = []
+        self.ui.listWidget.clear()
+
+        if not self.save_path or not self.image_name:
+            return
+
+        base_path = Path(self.save_path) / self.image_name
+        preferred_formats = [self.annotation_format]
+        fallback = "YOLO" if self.annotation_format == "XML" else "XML"
+        preferred_formats.append(fallback)
+
+        for fmt in preferred_formats:
+            if fmt == "YOLO":
+                txt_path = base_path.with_suffix(".txt")
+                labels, boxes, names = load_yolo_labels(txt_path, self.img_width or 0, self.img_height or 0)
+                if not labels:
+                    continue
+                self.labels = labels
+                self.paint_save = boxes
+                for name in names:
+                    self.ui.listWidget.addItem(name)
+                self.Show_Exists()
+                return
+            else:
+                xml_path = base_path.with_suffix(".xml")
+                if not xml_path.exists():
+                    continue
+                self.labels = get_labels(str(xml_path))
+                self.list_labels, list_box = list_label(str(xml_path))
+                self.paint_save = list_box
+                for label in self.list_labels:
+                    self.ui.listWidget.addItem(label)
+                self.Show_Exists()
+                return
 
     def show_qt(self, img_path):
         if img_path != None:
@@ -298,8 +335,14 @@ class MainFunc(QMainWindow):
                     self.show_qt(self.img_path)
                     self.ui.label_4.mousePressEvent = self.mouse_press_event
                     self.ui.label_4.setCursor(Qt.ArrowCursor)
-                    if os.path.exists(f"{self.save_path}/{self.image_name}.xml"):
-                        os.remove(f"{self.save_path}/{self.image_name}.xml")
+                    base_path = Path(self.save_path) / self.image_name if self.save_path else None
+                    if base_path:
+                        xml_path = base_path.with_suffix(".xml")
+                        txt_path = base_path.with_suffix(".txt")
+                        if xml_path.exists():
+                            xml_path.unlink()
+                        if txt_path.exists():
+                            txt_path.unlink()
                         self.labels = []
                     else:
                         super(QMainWindow, self).keyPressEvent(event)
@@ -318,7 +361,7 @@ class MainFunc(QMainWindow):
                                                   text, self.AT.x, self.AT.y, self.AT.w, self.AT.h)
             self.labels.append(result)
             self.clicked_save.append([self.AT.x, self.AT.y, (self.AT.w + self.AT.x), (self.AT.h + self.AT.y)])
-            xml(self.image_path, file_path, size, self.labels)
+            self.save_annotation_files(self.image_path, self.image_name, size, self.labels)
 
         elif text and self.paint_event:
             self.paint_event = False
@@ -329,7 +372,7 @@ class MainFunc(QMainWindow):
                                                   abs(self.y1 - self.y0))
             self.labels.append(result)
             self.paint_save.append([self.x0, self.y0, self.x1, self.y1])
-            xml(self.image_path, file_path, size, self.labels)
+            self.save_annotation_files(self.image_path, self.image_name, size, self.labels)
 
             self.ui.label_4.mousePressEvent = self.mouse_press_event
             self.ui.label_4.setCursor(Qt.ArrowCursor)
@@ -350,7 +393,7 @@ class MainFunc(QMainWindow):
                                                     text, self.AT.x, self.AT.y, self.AT.w, self.AT.h)
             self.labels.append(result)
             self.clicked_save.append([self.AT.x, self.AT.y, (self.AT.w + self.AT.x), (self.AT.h + self.AT.y)])
-            xml(self.image_path, file_path, size, self.labels)
+            self.save_annotation_files(self.image_path, self.image_name, size, self.labels)
             # 启用"开始检测打标"按钮
             self.ui.pushButton_start_marking.setEnabled(True)
         self.clicked_event = False
@@ -663,14 +706,15 @@ class MainFunc(QMainWindow):
                     self.img_path, self.img_width, self.img_height = Change_image_Size(self.img_path)
                     print(self.img_path, self.img_width, self.img_height)
                     self.image = cv2.imread(self.img_path)
-                    
+
                     self.AT.Set_Image(self.image)
                     # 转换为QPixmap并显示
                     Qt_Gui = QtGui.QPixmap(self.img_path)
                     # 设置label大小为图片原始大小
                     self.ui.label_3.setFixedSize(self.img_width, self.img_height)
                     self.ui.label_3.setPixmap(Qt_Gui)
-                
+                    self.ui.currentImageLabel.setText(f"当前图片：{os.path.basename(self.image_path)}")
+
             # 鼠标点击触发
             self.ui.label_4.mousePressEvent = self.mouse_press_event
         else:
@@ -688,23 +732,45 @@ class MainFunc(QMainWindow):
                 # 获取不带扩展名的文件名
                 img_name = os.path.splitext(img_file)[0]
                 img_file  = os.path.join(self.output_dir,img_file)
-                
+
                 # 在xml_messages中查找对应的消息
                 for msg in self.xml_messages:
                     self.labels = []
                     if len(msg) > 1:  # 确保msg有足够的元素
                         xml_path = msg[1]  # 获取索引值为1的路径
                         xml_filename = os.path.splitext(os.path.basename(xml_path))[0]
-                        
+
                         # 如果文件名匹配，则复制XML文件到save_path
                         if xml_filename == img_name and self.save_path:
                             result = msg[0]
                             file_path = msg[1]
                             size = msg[2]
                             self.labels.append(result)
-                            xml(img_file, file_path, size, self.labels)
+                            self.save_annotation_files(img_file, img_name, size, self.labels)
         self.ui.listWidget.addItem("检测打标完成！")
         print("检测打标完成！")
+
+    def on_annotation_format_changed(self, text):
+        self.annotation_format = text.strip().upper() or "XML"
+        self.Exists_Labels_And_Boxs()
+
+    def save_annotation_files(self, image_path, image_name, size, labels):
+        if not self.save_path:
+            return
+
+        base_path = Path(self.save_path) / str(image_name)
+
+        if self.annotation_format == "YOLO":
+            write_yolo_labels(base_path, size, labels)
+            xml_path = base_path.with_suffix(".xml")
+            if xml_path.exists():
+                xml_path.unlink()
+        else:
+            xml_path = base_path.with_suffix(".xml")
+            xml(image_path, str(xml_path), size, labels)
+            txt_path = base_path.with_suffix(".txt")
+            if txt_path.exists():
+                txt_path.unlink()
                             
 
     def Btn_Start_Marking(self):

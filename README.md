@@ -7,6 +7,7 @@
 🔥 V1.0 : 2024/7/8: 
 
 - 我们更新了模型仓库的运行文件和配置文件，开源基础的UI跟标注功能，主要用于XML的数据标注。
+- 保存标注时会在 XML 旁边自动生成符合 Ultralytics YOLOv8 要求的 `.txt` 标签文件，并在保存目录维护 `classes.txt` 以记录类别顺序。
 
 🔥 V2.0 : 2025/1/20:
 - 打标方式新增拉框标注，打标方式可切换。
@@ -16,6 +17,9 @@
 - 优化了项目代码，修改了以知的BUG。
 
 
+### AutoYolo 次世代工具
+为满足 RTX 50 系列用户的 GPU 支持需求，项目新增 `AutoYolo/` 子目录，提供 PySide6 全新界面与 DirectML 自动回退能力。请参阅 [AutoYolo/README.md](AutoYolo/README.md) 了解安装与使用方法。
+
 ### 简介
 LabelQuick_V2.0 是一款由 AI Horizon 团队设计并开发的快速图像标注工具，该版本在上一个版本的基础上进行了优化与改进。目前提供了直观易用的界面和强大的标注与分割功能，帮助您高效完成数据集的标注工作。当前版本仅支持 Windows 系统。
 
@@ -23,6 +27,7 @@ LabelQuick_V2.0 是一款由 AI Horizon 团队设计并开发的快速图像标�
 
 
 ### 快速开始
+> 想在 RTX 50 系列或 CUDA 12.9 环境下极速部署？请参阅新增的《[LabelQuick CUDA 12.9 版简介](docs/cuda129_overview.md)》获取完整说明。
 >⚠️显存最低需要`6G`⚠️
 1. **拉取代码**
    ```bash
@@ -33,31 +38,61 @@ LabelQuick_V2.0 是一款由 AI Horizon 团队设计并开发的快速图像标�
 下载[模型](https://pan.baidu.com/s/1dnfxBXaCYANRGcAxx7y0vg?pwd=ax58)到 `sampro/checkpoints` 里面。
 -<div> <img src="docs/image3.png"></div>
 
+   如果您希望将权重存放在其他目录，也可以在启动前设置环境变量 `SAM2_CHECKPOINT=/your/path/sam2.1_hiera_large.pt`（Windows 使用 `set` 命令），项目会自动读取该路径。
+
 3. **环境配置**
-   ```bash
-   # 虚拟环境创建
-    conda create -n Anything python=3.10
-    conda activate Anything
 
-    # pytorch安装方式1（没有安装CUDA）：
-    conda install cudatoolkit=11.8 -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/linux-64/
+   项目已针对 **Python 3.10.18** 与 **CUDA 12.9** 更新依赖，可直接驱动 RTX 5060（计算能力 `sm_120`）。
 
-    conda install cudnn
+   - **方式一：使用 Conda 一键创建环境（推荐）**
 
-    pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu118
+     ```bash
+     conda env create -f environment.yml
+     conda activate labelquick
+     ```
 
-    # pytorch安装方式2（已经有安装CUDA，版本为CUDA=11.8）：
-    pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 --index-url https://download.pytorch.org/whl/cu118
-    ```
+   - **方式二：在已有虚拟环境中手动安装**
 
-    ```bash
-    # 安装项目依赖
-    pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-    ```
+     ```bash
+     conda create -n labelquick python=3.10.18
+     conda activate labelquick
+     pip install -r requirements.txt
+     ```
+
+   说明：
+
+   - `requirements.txt` 已包含 PyTorch 2.6.0 的 CUDA 12.9（`cu129`）官方轮子，能够原生支持 RTX 50 系列等 `sm_120` 架构显卡。请确保已安装 **CUDA 12.9 驱动** 或更新版本。
+   - 若希望在 CPU 上运行，可在启动前通过设置 `SAM_DEVICE=cpu` 强制使用 CPU；项目仍会在检测到 GPU 不可用时自动回退。
+   - `requirements.txt` 统一依赖 `pycocotools`。Windows 用户需要先安装 [Visual C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) 并确保已安装 `cython`，随后执行 `pip install pycocotools>=2.0.8` 即可完成编译安装。
+   - 如果在安装过程中 CUDA 扩展编译失败，可在安装前执行 `export SAM2_BUILD_CUDA=0`（Windows 使用 `set SAM2_BUILD_CUDA=0`）以跳过可选的 GPU 扩展构建。
+
+   - **国内镜像加速（可选）**
+
+     如果在国内网络环境下下载依赖较慢，可先配置 Conda 与 pip 的国内镜像：
+
+     ```bash
+     # Conda 镜像（如已配置可跳过）
+     conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main
+     conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge
+     conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch
+     conda config --set show_channel_urls yes
+
+     # pip 镜像（requirements.txt 已默认启用清华源和 PyTorch CUDA 轮子源）
+     pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+     pip config set global.extra-index-url https://download.pytorch.org/whl/cu129
+     ```
+
+     如果不想修改全局配置，可在安装时临时指定：
+
+     ```bash
+     pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple \
+        --extra-index-url https://download.pytorch.org/whl/cu129
+     ```
 
 4. **项目运行**
 
 - 运行 `Run.py` 打开 LabelQuick。
+- 标注完成后，同名的 `.xml` 与 `.txt` 会同时保存，`classes.txt` 会持续收集出现过的标签，可直接拷贝到 YOLO 数据集的 `labels/` 目录中使用。
 
 
 ### 用户界面介绍

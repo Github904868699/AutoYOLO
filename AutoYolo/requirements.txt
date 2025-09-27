@@ -1,0 +1,13 @@
+ultralytics==8.3.34
+PySide6==6.7.2
+qdarktheme==2.1.0
+torch==2.5.1
+torchvision==0.20.1
+torchaudio==2.5.1
+torch-directml>=0.2.0
+onnxruntime==1.18.1
+loguru==0.7.2
+numpy>=1.26
+pillow>=10.3
+opencv-python-headless>=4.10
+scipy>=1.11

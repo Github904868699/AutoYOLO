@@ -105,9 +105,24 @@
             <widget class="QComboBox" name="comboBox">
              <item>
               <property name="text">
-               <string>yolov5</string>
+               <string>XML</string>
               </property>
              </item>
+             <item>
+              <property name="text">
+               <string>YOLO</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="currentImageLabel">
+             <property name="text">
+              <string>当前图片：-</string>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
+             </property>
             </widget>
            </item>
            <item>
